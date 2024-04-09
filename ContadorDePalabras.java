@@ -1,0 +1,91 @@
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+
+public class ContadorDePalabras extends JFrame {
+
+    private JTextArea textArea;
+    private JFileChooser fileChooser;
+    private JLabel wordCountLabel;
+    private JButton countButton;
+
+    public ContadorDePalabras() {
+        setTitle("Contador de palabras");
+        setSize(600, 400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        initComponents();
+        setVisible(true);
+    }
+
+    private void initComponents() {
+        textArea = new JTextArea();
+        JScrollPane scrollPane = new JScrollPane(textArea);
+
+        countButton = new JButton("Contar palabras");
+        countButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                countWords();
+            }
+        });
+
+        wordCountLabel = new JLabel("Conteo de palabras: 0");
+
+        JButton openButton = new JButton("Abrir");
+        openButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openFile();
+            }
+        });
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(openButton);
+        buttonPanel.add(countButton);
+        buttonPanel.add(wordCountLabel);
+
+        add(scrollPane, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void countWords() {
+        String text = textArea.getText();
+        int wordCount = text.split("\\s+").length;
+        wordCountLabel.setText("Conteo de palabras: " + wordCount);
+    }
+
+    private void openFile() {
+        if (fileChooser == null) {
+            fileChooser = new JFileChooser();
+        }
+
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de texto", "txt"));
+        int option = fileChooser.showOpenDialog(this);
+
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                StringBuilder content = new StringBuilder();
+                while ((line = reader.readLine()) != null) {
+                    content.append(line).append("\n");
+                }
+                textArea.setText(content.toString());
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error al abrir el archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new ContadorDePalabras();
+            }
+        });
+    }
+}
